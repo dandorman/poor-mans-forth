@@ -53,7 +53,9 @@ module Stacker
     end
 
     def concat(other_stack)
-      stack.concat(other_stack)
+      other_stack.each do |arg|
+        execute arg
+      end
     end
 
     private
@@ -75,17 +77,6 @@ module Stacker
   end
 
   class IfProcessor
-    OPERATIONS = {
-      "ADD"      => :+,
-      "SUBTRACT" => :-,
-      "MULTIPLY" => :*,
-      "DIVIDE"   => :/,
-      "MOD"      => :%,
-      "<"        => :<,
-      ">"        => :>,
-      "="        => :==
-    }
-
     attr_reader :stack
     attr_reader :previous
 
@@ -97,22 +88,14 @@ module Stacker
     def execute(arg)
       case arg
 
-      when *OPERATIONS.keys
-        b, a = stack.pop, stack.pop
-        stack << process_result(a.send(OPERATIONS[arg], b))
-
       when "IF"
         return IfElseProcessor.build(stack.pop == :true, self)
       when "ELSE"
         previous.concat(stack)
         return EmptyElseProcessor.new(previous)
 
-      when ":true"
-        stack << :true
-      when ":false"
-        stack << :false
       else
-        stack << Integer(arg)
+        stack << arg
       end
 
       self
