@@ -20,6 +20,16 @@ module Stacker
     end
   end
 
+  class NullProcessor
+    def stack
+      []
+    end
+
+    def execute(arg)
+      self
+    end
+  end
+
   class Processor
     OPERATIONS = {
       "ADD"      => :+,
@@ -35,9 +45,9 @@ module Stacker
     attr_reader :previous
     attr_reader :stack
 
-    def initialize(previous = nil)
+    def initialize(previous = NullProcessor.new)
       @previous = previous
-      @stack = []
+      @stack = @previous.stack
     end
 
     def execute(arg)
@@ -49,6 +59,9 @@ module Stacker
 
       when "IF"
         return IfElseBuilder.build(stack.pop, self)
+
+      when "TIMES"
+        return TimesProcessor.new(stack.pop, self)
 
       when ":true"
         stack << true
@@ -71,8 +84,6 @@ module Stacker
   class IfProcessor < Processor
     def execute(arg)
       return super unless arg == "ELSE"
-
-      previous.stack.concat(stack)
       EmptyElseProcessor.new(previous)
     end
   end
@@ -100,8 +111,6 @@ module Stacker
   class ElseProcessor < Processor
     def execute(arg)
       return super unless arg == "THEN"
-
-      previous.stack.concat(stack)
       previous
     end
   end
@@ -122,6 +131,30 @@ module Stacker
         else
           @depth -= 1
         end
+      end
+
+      self
+    end
+  end
+
+  class TimesProcessor
+    def initialize(count, previous)
+      @count = Integer(count)
+      @previous = previous
+      @stack = []
+    end
+
+    def execute(arg)
+      if arg == "/TIMES"
+        @count.times do
+          processor = @previous
+          @stack.each do |arg|
+            processor = processor.execute(arg)
+          end
+        end
+        return @previous
+      else
+        @stack << arg
       end
 
       self

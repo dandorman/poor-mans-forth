@@ -242,7 +242,6 @@ describe "Stacker::Interpreter" do
   end
 
   it "implements TIMES command" do
-    skip
     execute %w[
       5
       3
@@ -256,7 +255,6 @@ describe "Stacker::Interpreter" do
   end
 
   it "implements TIMES inside of IF command" do
-    skip
     execute %w[
       :true
       IF
@@ -287,7 +285,6 @@ describe "Stacker::Interpreter" do
   end
   
   it "implements IF inside of TIMES command" do
-    skip
     execute %w[
       5
       3
