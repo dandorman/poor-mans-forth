@@ -70,12 +70,10 @@ module Stacker
 
   class IfProcessor < Processor
     def execute(arg)
-      if arg == "ELSE"
-        previous.stack.concat(stack)
-        return EmptyElseProcessor.new(previous)
-      else
-        super
-      end
+      return super unless arg == "ELSE"
+
+      previous.stack.concat(stack)
+      EmptyElseProcessor.new(previous)
     end
   end
 
@@ -101,12 +99,10 @@ module Stacker
 
   class ElseProcessor < Processor
     def execute(arg)
-      if arg == "THEN"
-        previous.stack.concat(stack)
-        previous
-      else
-        super
-      end
+      return super unless arg == "THEN"
+
+      previous.stack.concat(stack)
+      previous
     end
   end
 
