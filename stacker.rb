@@ -25,7 +25,7 @@ module Stacker
       "="        => :==
     }
 
-    attr_accessor :stack
+    attr_reader :stack
 
     def initialize
       @stack = []
@@ -82,7 +82,7 @@ module Stacker
       "="        => :==
     }
 
-    attr_accessor :stack
+    attr_reader :stack
     attr_reader :previous
 
     def initialize(previous)
@@ -158,7 +158,7 @@ module Stacker
       "="        => :==
     }
 
-    attr_accessor :stack
+    attr_reader :stack
     attr_reader :previous
 
     def initialize(previous)
