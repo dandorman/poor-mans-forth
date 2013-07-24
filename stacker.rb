@@ -27,8 +27,7 @@ module Stacker
 
     attr_accessor :stack
 
-    def initialize(previous = nil)
-      @previous = previous
+    def initialize
       @stack = []
     end
 
@@ -37,7 +36,7 @@ module Stacker
 
       when *OPERATIONS.keys
         b, a = stack.pop, stack.pop
-        self.stack << process_result(a.send(OPERATIONS[arg], b))
+        stack << process_result(a.send(OPERATIONS[arg], b))
 
       when "IF"
         return IfProcessor.new(stack.pop == :true, self)
@@ -78,6 +77,9 @@ module Stacker
     }
 
     attr_accessor :stack
+    attr_reader :if_stack
+    attr_reader :else_stack
+    attr_reader :previous
     attr_reader :test
 
     def initialize(test, previous)
@@ -92,19 +94,19 @@ module Stacker
 
       when *OPERATIONS.keys
         b, a = stack.pop, stack.pop
-        self.stack << process_result(a.send(OPERATIONS[arg], b))
+        stack << process_result(a.send(OPERATIONS[arg], b))
 
       when "IF"
         return IfProcessor.new(stack.pop == :true, self)
       when "ELSE"
-        @stack = @else_stack
+        self.stack = else_stack
       when "THEN"
         if test
-          @previous.stack.concat(@if_stack)
+          previous.stack.concat(if_stack)
         else
-          @previous.stack.concat(@else_stack)
+          previous.stack.concat(else_stack)
         end
-        return @previous
+        return previous
 
       when ":true"
         stack << :true
