@@ -242,6 +242,7 @@ describe "Stacker::Interpreter" do
   end
 
   it "implements TIMES command" do
+    skip
     execute %w[
       5
       3
@@ -255,6 +256,7 @@ describe "Stacker::Interpreter" do
   end
 
   it "implements TIMES inside of IF command" do
+    skip
     execute %w[
       :true
       IF
@@ -285,6 +287,7 @@ describe "Stacker::Interpreter" do
   end
   
   it "implements IF inside of TIMES command" do
+    skip
     execute %w[
       5
       3
@@ -307,6 +310,7 @@ describe "Stacker::Interpreter" do
   end
 
   it "implements PROCEDURE command" do
+    skip
     execute %w[
       PROCEDURE\ DOUBLE
       2
@@ -321,6 +325,7 @@ describe "Stacker::Interpreter" do
   end
   
   it "implements DUP command" do
+    skip
     execute %w[
       1
       2
@@ -331,6 +336,7 @@ describe "Stacker::Interpreter" do
   end
 
   it "implements SWAP command" do
+    skip
     execute %w[
       1
       2
@@ -341,6 +347,7 @@ describe "Stacker::Interpreter" do
   end
   
   it "implements DROP" do
+    skip
     execute %w[
       1
       2
@@ -351,6 +358,7 @@ describe "Stacker::Interpreter" do
   end
   
   it "implements ROT" do
+    skip
     execute %w[
       :foo
       :bar
@@ -366,6 +374,7 @@ describe "Stacker::Interpreter" do
   end
 
   it "implements support for adding arbitrary symbols to the stack" do
+    skip
     execute %w[
       :foo
       :bar
