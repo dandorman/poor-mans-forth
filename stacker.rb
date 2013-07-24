@@ -48,7 +48,7 @@ module Stacker
         stack << a.send(OPERATIONS[arg], b)
 
       when "IF"
-        return IfElseProcessor.build(stack.pop, self)
+        return IfElseBuilder.build(stack.pop, self)
 
       when ":true"
         stack << true
@@ -62,7 +62,7 @@ module Stacker
     end
   end
 
-  class IfElseProcessor
+  class IfElseBuilder
     def self.build(test, previous)
       test ? IfProcessor.new(previous) : EmptyIfProcessor.new(previous)
     end
