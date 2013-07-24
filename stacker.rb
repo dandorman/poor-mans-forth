@@ -127,9 +127,6 @@ module Stacker
   end
 
   class EmptyIfProcessor
-    attr_reader :depth
-    attr_reader :previous
-
     def initialize(previous)
       @depth = 0
       @previous = previous
@@ -140,7 +137,7 @@ module Stacker
       when "IF"
         @depth += 1
       when "ELSE"
-        return ElseProcessor.new(previous) if depth.zero?
+        return ElseProcessor.new(@previous) if @depth.zero?
       when "THEN"
         @depth -= 1
       end
@@ -206,9 +203,6 @@ module Stacker
   end
 
   class EmptyElseProcessor
-    attr_reader :depth
-    attr_reader :previous
-
     def initialize(previous)
       @depth = 0
       @previous = previous
@@ -219,8 +213,8 @@ module Stacker
       when "IF"
         @depth += 1
       when "THEN"
-        if depth.zero?
-          return previous
+        if @depth.zero?
+          return @previous
         else
           @depth -= 1
         end
