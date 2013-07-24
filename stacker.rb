@@ -1,5 +1,19 @@
 module Stacker
   class Interpreter
+    def initialize
+      @processor = Processor.new
+    end
+
+    def stack
+      @processor.stack
+    end
+
+    def execute(arg)
+      @processor = @processor.execute(arg)
+    end
+  end
+
+  class Processor
     OPERATIONS = {
       "ADD"      => :+,
       "SUBTRACT" => :-,
@@ -13,9 +27,15 @@ module Stacker
 
     attr_accessor :stack
 
-    def initialize
-      @contexts = [[]]
-      @stack = @contexts.first
+    def initialize(contexts = [[]])
+      @contexts = contexts
+      @stack = if @contexts.last.is_a?(Array)
+                 @contexts.last
+               elsif @contexts.last[:else]
+                 @contexts.last[:else]
+               else
+                 @contexts.last[:if]
+               end
     end
 
     def execute(arg)
@@ -59,6 +79,8 @@ module Stacker
       else
         stack << arg.to_i
       end
+
+      self.class.new(@contexts)
     end
 
     private
