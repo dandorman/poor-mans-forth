@@ -39,7 +39,7 @@ module Stacker
         stack << process_result(a.send(OPERATIONS[arg], b))
 
       when "IF"
-        return IfProcessor.new(stack.pop == :true, self)
+        return IfElseProcessor.build(stack.pop == :true, self)
 
       when ":true"
         stack << :true
@@ -64,6 +64,12 @@ module Stacker
     end
   end
 
+  class IfElseProcessor
+    def self.build(test, previous)
+      test ? IfProcessor.new(previous) : EmptyIfProcessor.new(previous)
+    end
+  end
+
   class IfProcessor
     OPERATIONS = {
       "ADD"      => :+,
@@ -77,16 +83,11 @@ module Stacker
     }
 
     attr_accessor :stack
-    attr_reader :if_stack
-    attr_reader :else_stack
     attr_reader :previous
-    attr_reader :test
 
-    def initialize(test, previous)
-      @test = test
+    def initialize(previous)
       @previous = previous
-      @stack = @if_stack = []
-      @else_stack = []
+      @stack = []
     end
 
     def execute(arg)
@@ -97,15 +98,88 @@ module Stacker
         stack << process_result(a.send(OPERATIONS[arg], b))
 
       when "IF"
-        return IfProcessor.new(stack.pop == :true, self)
+        return IfElseProcessor.build(stack.pop == :true, self)
       when "ELSE"
-        self.stack = else_stack
+        previous.stack.concat(stack)
+        return EmptyElseProcessor.new(previous)
+
+      when ":true"
+        stack << :true
+      when ":false"
+        stack << :false
+      else
+        stack << Integer(arg)
+      end
+
+      self
+    end
+
+    private
+
+    def process_result(result)
+      case result
+      when true, false
+        result.to_s.to_sym
+      else
+        result
+      end
+    end
+  end
+
+  class EmptyIfProcessor
+    attr_reader :depth
+    attr_reader :previous
+
+    def initialize(previous)
+      @depth = 0
+      @previous = previous
+    end
+
+    def execute(arg)
+      case arg
+      when "IF"
+        @depth += 1
+      when "ELSE"
+        return ElseProcessor.new(previous) if depth.zero?
       when "THEN"
-        if test
-          previous.stack.concat(if_stack)
-        else
-          previous.stack.concat(else_stack)
-        end
+        @depth -= 1
+      end
+
+      self
+    end
+  end
+
+  class ElseProcessor
+    OPERATIONS = {
+      "ADD"      => :+,
+      "SUBTRACT" => :-,
+      "MULTIPLY" => :*,
+      "DIVIDE"   => :/,
+      "MOD"      => :%,
+      "<"        => :<,
+      ">"        => :>,
+      "="        => :==
+    }
+
+    attr_accessor :stack
+    attr_reader :previous
+
+    def initialize(previous)
+      @previous = previous
+      @stack = []
+    end
+
+    def execute(arg)
+      case arg
+
+      when *OPERATIONS.keys
+        b, a = stack.pop, stack.pop
+        stack << process_result(a.send(OPERATIONS[arg], b))
+
+      when "IF"
+        return IfElseProcessor.build(stack.pop == :true, self)
+      when "THEN"
+        previous.stack.concat(stack)
         return previous
 
       when ":true"
@@ -128,6 +202,31 @@ module Stacker
       else
         result
       end
+    end
+  end
+
+  class EmptyElseProcessor
+    attr_reader :depth
+    attr_reader :previous
+
+    def initialize(previous)
+      @depth = 0
+      @previous = previous
+    end
+
+    def execute(arg)
+      case arg
+      when "IF"
+        @depth += 1
+      when "THEN"
+        if depth.zero?
+          return previous
+        else
+          @depth -= 1
+        end
+      end
+
+      self
     end
   end
 end
