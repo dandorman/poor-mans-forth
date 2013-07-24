@@ -5,7 +5,14 @@ module Stacker
     end
 
     def stack
-      @processor.stack
+      @processor.stack.map { |value|
+        case value
+        when TrueClass, FalseClass
+          value.to_s.to_sym
+        else
+          value
+        end
+      }
     end
 
     def execute(arg)
@@ -36,15 +43,15 @@ module Stacker
 
       when *OPERATIONS.keys
         b, a = stack.pop, stack.pop
-        stack << process_result(a.send(OPERATIONS[arg], b))
+        stack << a.send(OPERATIONS[arg], b)
 
       when "IF"
-        return IfElseProcessor.build(stack.pop == :true, self)
+        return IfElseProcessor.build(stack.pop, self)
 
       when ":true"
-        stack << :true
+        stack << true
       when ":false"
-        stack << :false
+        stack << false
       else
         stack << Integer(arg)
       end
@@ -55,17 +62,6 @@ module Stacker
     def concat(other_stack)
       other_stack.each do |arg|
         execute arg
-      end
-    end
-
-    private
-
-    def process_result(result)
-      case result
-      when true, false
-        result.to_s.to_sym
-      else
-        result
       end
     end
   end
@@ -89,11 +85,15 @@ module Stacker
       case arg
 
       when "IF"
-        return IfElseProcessor.build(stack.pop == :true, self)
+        return IfElseProcessor.build(stack.pop, self)
       when "ELSE"
         previous.concat(stack)
         return EmptyElseProcessor.new(previous)
 
+      when ":true"
+        stack << true
+      when ":false"
+        stack << false
       else
         stack << arg
       end
@@ -103,17 +103,6 @@ module Stacker
 
     def concat(other_stack)
       stack.concat(other_stack)
-    end
-
-    private
-
-    def process_result(result)
-      case result
-      when true, false
-        result.to_s.to_sym
-      else
-        result
-      end
     end
   end
 
@@ -162,18 +151,18 @@ module Stacker
 
       when *OPERATIONS.keys
         b, a = stack.pop, stack.pop
-        stack << process_result(a.send(OPERATIONS[arg], b))
+        stack << a.send(OPERATIONS[arg], b)
 
       when "IF"
-        return IfElseProcessor.build(stack.pop == :true, self)
+        return IfElseProcessor.build(stack.pop, self)
       when "THEN"
         previous.concat(stack)
         return previous
 
       when ":true"
-        stack << :true
+        stack << true
       when ":false"
-        stack << :false
+        stack << false
       else
         stack << Integer(arg)
       end
@@ -183,17 +172,6 @@ module Stacker
 
     def concat(other_stack)
       stack.concat(other_stack)
-    end
-
-    private
-
-    def process_result(result)
-      case result
-      when true, false
-        result.to_s.to_sym
-      else
-        result
-      end
     end
   end
 
