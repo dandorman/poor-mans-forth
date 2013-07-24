@@ -58,10 +58,6 @@ module Stacker
 
       self
     end
-
-    def concat(other_stack)
-      stack.concat(other_stack)
-    end
   end
 
   class IfElseProcessor
@@ -100,7 +96,7 @@ module Stacker
       when "IF"
         return IfElseProcessor.build(stack.pop, self)
       when "ELSE"
-        previous.concat(stack)
+        previous.stack.concat(stack)
         return EmptyElseProcessor.new(previous)
 
       when ":true"
@@ -112,10 +108,6 @@ module Stacker
       end
 
       self
-    end
-
-    def concat(other_stack)
-      stack.concat(other_stack)
     end
   end
 
@@ -169,7 +161,7 @@ module Stacker
       when "IF"
         return IfElseProcessor.build(stack.pop, self)
       when "THEN"
-        previous.concat(stack)
+        previous.stack.concat(stack)
         return previous
 
       when ":true"
@@ -181,10 +173,6 @@ module Stacker
       end
 
       self
-    end
-
-    def concat(other_stack)
-      stack.concat(other_stack)
     end
   end
 
