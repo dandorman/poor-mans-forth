@@ -27,15 +27,9 @@ module Stacker
 
     attr_accessor :stack
 
-    def initialize(contexts = [[]])
-      @contexts = contexts
-      @stack = if @contexts.last.is_a?(Array)
-                 @contexts.last
-               elsif @contexts.last[:else]
-                 @contexts.last[:else]
-               else
-                 @contexts.last[:if]
-               end
+    def initialize(previous = nil)
+      @previous = previous
+      @stack = []
     end
 
     def execute(arg)
@@ -46,41 +40,81 @@ module Stacker
         self.stack << process_result(a.send(OPERATIONS[arg], b))
 
       when "IF"
-        if_else = {
-          test: stack.pop,
-          if: [],
-          else: nil
-        }
-        @contexts << if_else
-        self.stack = @contexts.last[:if]
-      when "ELSE"
-        @contexts.last[:else] = []
-        self.stack = @contexts.last[:else]
-      when "THEN"
-        if_else = @contexts.pop
-        if @contexts.last.is_a?(Array)
-          self.stack = @contexts.last
-        elsif @contexts.last[:else]
-          self.stack = @contexts.last[:else]
-        else
-          self.stack = @contexts.last[:if]
-        end
-
-        if if_else[:test] == :true
-          stack.concat(if_else[:if])
-        else
-          stack.concat(if_else[:else])
-        end
+        return IfProcessor.new(stack.pop == :true, self)
 
       when ":true"
         stack << :true
       when ":false"
         stack << :false
       else
-        stack << arg.to_i
+        stack << Integer(arg)
       end
 
-      self.class.new(@contexts)
+      self
+    end
+
+    private
+
+    def process_result(result)
+      case result
+      when true, false
+        result.to_s.to_sym
+      else
+        result
+      end
+    end
+  end
+
+  class IfProcessor
+    OPERATIONS = {
+      "ADD"      => :+,
+      "SUBTRACT" => :-,
+      "MULTIPLY" => :*,
+      "DIVIDE"   => :/,
+      "MOD"      => :%,
+      "<"        => :<,
+      ">"        => :>,
+      "="        => :==
+    }
+
+    attr_accessor :stack
+    attr_reader :test
+
+    def initialize(test, previous)
+      @test = test
+      @previous = previous
+      @stack = @if_stack = []
+      @else_stack = []
+    end
+
+    def execute(arg)
+      case arg
+
+      when *OPERATIONS.keys
+        b, a = stack.pop, stack.pop
+        self.stack << process_result(a.send(OPERATIONS[arg], b))
+
+      when "IF"
+        return IfProcessor.new(stack.pop == :true, self)
+      when "ELSE"
+        @stack = @else_stack
+      when "THEN"
+        if test
+          @previous.stack.concat(@if_stack)
+        else
+          @previous.stack.concat(@else_stack)
+        end
+        return @previous
+
+      when ":true"
+        stack << :true
+      when ":false"
+        stack << :false
+      else
+        stack << Integer(arg)
+      end
+
+      self
     end
 
     private
