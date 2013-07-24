@@ -32,9 +32,11 @@ module Stacker
       "="        => :==
     }
 
+    attr_reader :previous
     attr_reader :stack
 
-    def initialize
+    def initialize(previous = nil)
+      @previous = previous
       @stack = []
     end
 
@@ -66,48 +68,14 @@ module Stacker
     end
   end
 
-  class IfProcessor
-    OPERATIONS = {
-      "ADD"      => :+,
-      "SUBTRACT" => :-,
-      "MULTIPLY" => :*,
-      "DIVIDE"   => :/,
-      "MOD"      => :%,
-      "<"        => :<,
-      ">"        => :>,
-      "="        => :==
-    }
-
-    attr_reader :stack
-    attr_reader :previous
-
-    def initialize(previous)
-      @previous = previous
-      @stack = []
-    end
-
+  class IfProcessor < Processor
     def execute(arg)
-      case arg
-
-      when *OPERATIONS.keys
-        b, a = stack.pop, stack.pop
-        stack << a.send(OPERATIONS[arg], b)
-
-      when "IF"
-        return IfElseProcessor.build(stack.pop, self)
-      when "ELSE"
+      if arg == "ELSE"
         previous.stack.concat(stack)
         return EmptyElseProcessor.new(previous)
-
-      when ":true"
-        stack << true
-      when ":false"
-        stack << false
       else
-        stack << Integer(arg)
+        super
       end
-
-      self
     end
   end
 
@@ -131,48 +99,14 @@ module Stacker
     end
   end
 
-  class ElseProcessor
-    OPERATIONS = {
-      "ADD"      => :+,
-      "SUBTRACT" => :-,
-      "MULTIPLY" => :*,
-      "DIVIDE"   => :/,
-      "MOD"      => :%,
-      "<"        => :<,
-      ">"        => :>,
-      "="        => :==
-    }
-
-    attr_reader :stack
-    attr_reader :previous
-
-    def initialize(previous)
-      @previous = previous
-      @stack = []
-    end
-
+  class ElseProcessor < Processor
     def execute(arg)
-      case arg
-
-      when *OPERATIONS.keys
-        b, a = stack.pop, stack.pop
-        stack << a.send(OPERATIONS[arg], b)
-
-      when "IF"
-        return IfElseProcessor.build(stack.pop, self)
-      when "THEN"
+      if arg == "THEN"
         previous.stack.concat(stack)
-        return previous
-
-      when ":true"
-        stack << true
-      when ":false"
-        stack << false
+        previous
       else
-        stack << Integer(arg)
+        super
       end
-
-      self
     end
   end
 
