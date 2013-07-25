@@ -32,12 +32,14 @@ module Stacker
       "="        => :==
     }
 
-    attr_reader :previous
-    attr_reader :stack
+    attr_reader :env
 
-    def initialize(previous = nil)
-      @previous = previous
-      @stack = previous ? @previous.stack : []
+    def initialize(env = nil)
+      @env = env || { previous: [], stack: [] }
+    end
+
+    def stack
+      env[:stack]
     end
 
     def execute(arg)
@@ -48,10 +50,10 @@ module Stacker
         stack << a.send(OPERATIONS[arg], b)
 
       when "IF"
-        return IfElseBuilder.build(stack.pop, self)
+        return IfElseBuilder.build(stack.pop, env.merge(previous: env[:previous] << self.class))
 
       when "TIMES"
-        return TimesProcessor.new(stack.pop, self)
+        return TimesProcessor.new(stack.pop, env.merge(previous: env[:previous] << self.class))
 
       when ":true"
         stack << true
@@ -61,27 +63,27 @@ module Stacker
         stack << Integer(arg)
       end
 
-      self
+      self.class.new(env)
     end
   end
 
   class IfElseBuilder
-    def self.build(test, previous)
-      test ? IfProcessor.new(previous) : EmptyIfProcessor.new(previous)
+    def self.build(test, env)
+      test ? IfProcessor.new(env) : EmptyIfProcessor.new(env)
     end
   end
 
   class IfProcessor < Processor
     def execute(arg)
       return super unless arg == "ELSE"
-      EmptyElseProcessor.new(previous)
+      EmptyElseProcessor.new(env)
     end
   end
 
   class EmptyIfProcessor
-    def initialize(previous)
+    def initialize(env)
       @depth = 0
-      @previous = previous
+      @env = env
     end
 
     def execute(arg)
@@ -89,7 +91,7 @@ module Stacker
       when "IF"
         @depth += 1
       when "ELSE"
-        return ElseProcessor.new(@previous) if @depth.zero?
+        return ElseProcessor.new(@env) if @depth.zero?
       when "THEN"
         @depth -= 1
       end
@@ -101,14 +103,14 @@ module Stacker
   class ElseProcessor < Processor
     def execute(arg)
       return super unless arg == "THEN"
-      previous
+      env[:previous].pop.new(env)
     end
   end
 
   class EmptyElseProcessor
-    def initialize(previous)
+    def initialize(env)
       @depth = 0
-      @previous = previous
+      @env = env
     end
 
     def execute(arg)
@@ -117,7 +119,7 @@ module Stacker
         @depth += 1
       when "THEN"
         if @depth.zero?
-          return @previous
+          return @env[:previous].pop.new(@env)
         else
           @depth -= 1
         end
@@ -128,21 +130,21 @@ module Stacker
   end
 
   class TimesProcessor
-    def initialize(count, previous)
+    def initialize(count, env)
       @count = Integer(count)
-      @previous = previous
+      @env = env
       @stack = []
     end
 
     def execute(arg)
       if arg == "/TIMES"
+        processor = @env[:previous].pop.new(@env)
         @count.times do
-          processor = @previous
           @stack.each do |arg|
             processor = processor.execute(arg)
           end
         end
-        return @previous
+        return processor
       else
         @stack << arg
       end
