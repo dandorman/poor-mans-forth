@@ -20,16 +20,6 @@ module Stacker
     end
   end
 
-  class NullProcessor
-    def stack
-      []
-    end
-
-    def execute(arg)
-      self
-    end
-  end
-
   class Processor
     OPERATIONS = {
       "ADD"      => :+,
@@ -45,9 +35,9 @@ module Stacker
     attr_reader :previous
     attr_reader :stack
 
-    def initialize(previous = NullProcessor.new)
+    def initialize(previous = nil)
       @previous = previous
-      @stack = @previous.stack
+      @stack = previous ? @previous.stack : []
     end
 
     def execute(arg)
