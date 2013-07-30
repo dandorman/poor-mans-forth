@@ -321,7 +321,6 @@ describe "Stacker::Interpreter" do
   end
   
   it "implements DUP command" do
-    skip
     execute %w[
       1
       2

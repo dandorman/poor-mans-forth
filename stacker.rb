@@ -56,6 +56,9 @@ module Stacker
         end
         return processor
 
+      when "DUP"
+        stack << stack.last
+
       when "IF"
         return IfElseBuilder.build(stack.pop, env.merge(previous: env[:previous] << self.class))
 
