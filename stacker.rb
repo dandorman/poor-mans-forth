@@ -76,6 +76,8 @@ module Stacker
         stack << true
       when ":false"
         stack << false
+      when /\A:(.*)/
+        stack << $1.to_sym
       else
         stack << Integer(arg)
       end

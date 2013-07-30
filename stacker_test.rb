@@ -367,7 +367,6 @@ describe "Stacker::Interpreter" do
   end
 
   it "implements support for adding arbitrary symbols to the stack" do
-    skip
     execute %w[
       :foo
       :bar
