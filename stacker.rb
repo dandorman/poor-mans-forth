@@ -58,6 +58,10 @@ module Stacker
 
       when "DUP"
         stack << stack.last
+      when "SWAP"
+        stack[-2..-1] = stack[-2..-1].reverse
+      when "DROP"
+        stack.pop
 
       when "IF"
         return IfElseBuilder.build(stack.pop, env.merge(previous: env[:previous] << self.class))

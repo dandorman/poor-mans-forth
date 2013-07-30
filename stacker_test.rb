@@ -331,7 +331,6 @@ describe "Stacker::Interpreter" do
   end
 
   it "implements SWAP command" do
-    skip
     execute %w[
       1
       2
@@ -342,7 +341,6 @@ describe "Stacker::Interpreter" do
   end
   
   it "implements DROP" do
-    skip
     execute %w[
       1
       2
