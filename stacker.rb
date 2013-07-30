@@ -62,6 +62,10 @@ module Stacker
         stack[-2..-1] = stack[-2..-1].reverse
       when "DROP"
         stack.pop
+      when "ROT"
+        last_three = stack.last(3)
+        last_three << last_three.shift
+        stack[-3..-1] = last_three
 
       when "IF"
         return IfElseBuilder.build(stack.pop, env.merge(previous: env[:previous] << self.class))

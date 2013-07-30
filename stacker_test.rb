@@ -351,7 +351,6 @@ describe "Stacker::Interpreter" do
   end
   
   it "implements ROT" do
-    skip
     execute %w[
       :foo
       :bar
