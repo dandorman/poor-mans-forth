@@ -307,7 +307,6 @@ describe "Stacker::Interpreter" do
   end
 
   it "implements PROCEDURE command" do
-    skip
     execute %w[
       PROCEDURE\ DOUBLE
       2

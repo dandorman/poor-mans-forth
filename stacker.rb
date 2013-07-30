@@ -35,7 +35,7 @@ module Stacker
     attr_reader :env
 
     def initialize(env = nil)
-      @env = env || { previous: [], stack: [] }
+      @env = env || { previous: [], stack: [], procedures: {} }
     end
 
     def stack
@@ -49,11 +49,21 @@ module Stacker
         b, a = stack.pop, stack.pop
         stack << a.send(OPERATIONS[arg], b)
 
+      when *env[:procedures].keys
+        processor = self.class.new(env)
+        env[:procedures][arg].each do |command|
+          processor = processor.execute(command)
+        end
+        return processor
+
       when "IF"
         return IfElseBuilder.build(stack.pop, env.merge(previous: env[:previous] << self.class))
 
       when "TIMES"
         return TimesProcessor.new(stack.pop, env.merge(previous: env[:previous] << self.class))
+
+      when /\APROCEDURE\s+(.*)\z/
+        return ProcedureDefinitionProcessor.new($1, env.merge(previous: env[:previous] << self.class))
 
       when ":true"
         stack << true
@@ -150,6 +160,24 @@ module Stacker
       end
 
       self
+    end
+  end
+
+  class ProcedureDefinitionProcessor
+    def initialize(name, env)
+      @name = name
+      @env = env
+      @stack = []
+    end
+
+    def execute(arg)
+      if arg == "/PROCEDURE"
+        @env[:procedures][@name] = @stack
+        @env[:previous].pop.new(@env)
+      else
+        @stack << arg
+        self
+      end
     end
   end
 end
