@@ -82,6 +82,8 @@ module Stacker
         stack << false
       when /\A:(.*)/
         stack << $1.to_sym
+      when /\A\s*\z/
+        # noop
       else
         stack << Integer(arg)
       end
