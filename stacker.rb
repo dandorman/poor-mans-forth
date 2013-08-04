@@ -106,8 +106,8 @@ module Stacker
   end
 
   class EmptyIfProcessor
-    def initialize(env)
-      @depth = 0
+    def initialize(env, depth = 0)
+      @depth = depth
       @env = env
     end
 
@@ -121,7 +121,7 @@ module Stacker
         @depth -= 1
       end
 
-      self
+      self.class.new(@env, @depth)
     end
   end
 
@@ -133,8 +133,8 @@ module Stacker
   end
 
   class EmptyElseProcessor
-    def initialize(env)
-      @depth = 0
+    def initialize(env, depth = 0)
+      @depth = depth
       @env = env
     end
 
@@ -150,15 +150,15 @@ module Stacker
         end
       end
 
-      self
+      self.class.new(@env, @depth)
     end
   end
 
   class TimesProcessor
-    def initialize(count, env)
+    def initialize(count, env, stack = [])
       @count = Integer(count)
       @env = env
-      @stack = []
+      @stack = stack
     end
 
     def execute(arg)
@@ -174,15 +174,15 @@ module Stacker
         @stack << arg
       end
 
-      self
+      self.class.new(@count, @env, @stack)
     end
   end
 
   class ProcedureDefinitionProcessor
-    def initialize(name, env)
+    def initialize(name, env, stack = [])
       @name = name
       @env = env
-      @stack = []
+      @stack = stack
     end
 
     def execute(arg)
@@ -191,7 +191,7 @@ module Stacker
         @env[:previous].pop.new(@env)
       else
         @stack << arg
-        self
+        self.class.new(@name, @env, @stack)
       end
     end
   end
