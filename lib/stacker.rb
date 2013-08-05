@@ -1,4 +1,5 @@
 require_relative 'stacker/interpreter'
+require_relative 'stacker/nodes/number'
 require_relative 'stacker/processor'
 require_relative 'stacker/processors/else_processor'
 require_relative 'stacker/processors/empty_else_processor'

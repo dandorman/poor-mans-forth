@@ -26,7 +26,12 @@ module Stacker
 
       when *OPERATIONS.keys
         b, a = stack.pop, stack.pop
-        stack << a.send(OPERATIONS[arg], b)
+        value = a.value.send(OPERATIONS[arg], b.value)
+        if Fixnum === value
+          stack << Number.new(value)
+        else
+          stack << value
+        end
 
       when *env[:procedures].keys
         processor = self.class.new(env)
@@ -50,7 +55,7 @@ module Stacker
         return IfElseBuilder.build(stack.pop, env.merge(previous: env[:previous] << self.class))
 
       when "TIMES"
-        return TimesProcessor.new(stack.pop, env.merge(previous: env[:previous] << self.class))
+        return TimesProcessor.new(stack.pop.value, env.merge(previous: env[:previous] << self.class))
 
       when /\APROCEDURE\s+(.*)\z/
         return ProcedureDefinitionProcessor.new($1, env.merge(previous: env[:previous] << self.class))
@@ -64,7 +69,7 @@ module Stacker
       when /\A\s*\z/
         # noop
       else
-        stack << Integer(arg)
+        stack << Number.new(Integer(arg))
       end
 
       self.class.new(env)
