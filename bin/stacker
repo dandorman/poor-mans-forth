@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+require_relative '../lib/stacker'
+
+interpreter = Stacker::Interpreter.new
+
+ARGF.each_line do |line|
+  interpreter.execute line.strip
+end
+
+puts interpreter.stack.reverse.map(&:inspect)
