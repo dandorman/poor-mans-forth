@@ -1,7 +1,7 @@
 module Stacker
   class Interpreter
     def initialize
-      @processor = Processor.new
+      @processor = Processor::Main.new
     end
 
     def stack
