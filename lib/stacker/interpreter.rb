@@ -9,7 +9,7 @@ module Stacker
         case value
         when TrueClass, FalseClass
           value.to_s.to_sym
-        when Number
+        when Node::Number
           value.value
         else
           value

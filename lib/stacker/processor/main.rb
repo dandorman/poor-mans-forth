@@ -29,7 +29,7 @@ module Stacker
           b, a = stack.pop, stack.pop
           value = a.value.send(OPERATIONS[arg], b.value)
           if Fixnum === value
-            stack << Number.new(value)
+            stack << Node::Number.new(value)
           else
             stack << value
           end
@@ -70,7 +70,7 @@ module Stacker
         when /\A\s*\z/
           # noop
         else
-          stack << Number.new(Integer(arg))
+          stack << Node::Number.new(Integer(arg))
         end
 
         self.class.new(env)
