@@ -8,6 +8,11 @@ require_relative 'command/less_than'
 require_relative 'command/greater_than'
 require_relative 'command/equal_to'
 
+require_relative 'command/duplicate'
+require_relative 'command/swap'
+require_relative 'command/drop'
+require_relative 'command/rotate'
+
 module Stacker
   class Command
     OPERATIONS = {
@@ -19,6 +24,10 @@ module Stacker
       "<"        => LessThan,
       ">"        => GreaterThan,
       "="        => EqualTo,
+      "DUP"      => Duplicate,
+      "SWAP"     => Swap,
+      "DROP"     => Drop,
+      "ROT"      => Rotate,
     }
 
     def self.for(processor, arg)
@@ -43,17 +52,6 @@ module Stacker
           new_processor = new_processor.execute(command)
         end
         return new_processor
-
-      when "DUP"
-        stack << stack.last
-      when "SWAP"
-        stack[-2..-1] = stack[-2..-1].reverse
-      when "DROP"
-        stack.pop
-      when "ROT"
-        last_three = stack.last(3)
-        last_three << last_three.shift
-        stack[-3..-1] = last_three
 
       when "IF"
         return Processor::IfElseBuilder.build(stack.pop, env.merge(previous: env[:previous] << processor.class))
