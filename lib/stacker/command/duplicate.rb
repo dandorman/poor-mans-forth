@@ -1,13 +1,7 @@
 module Stacker
   class Command
     class Duplicate
-      attr_reader :stack
-
-      def initialize(stack)
-        @stack = stack
-      end
-
-      def execute
+      def execute(stack)
         stack << stack.last
       end
     end

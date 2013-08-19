@@ -1,13 +1,7 @@
 module Stacker
   class Command
     class Drop
-      attr_reader :stack
-
-      def initialize(stack)
-        @stack = stack
-      end
-
-      def execute
+      def execute(stack)
         stack.pop
       end
     end
