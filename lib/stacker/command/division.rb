@@ -1,5 +1,5 @@
 module Stacker
-  class Command
+  module Command
     class Division
       def execute(stack)
         b, a = stack.pop, stack.pop

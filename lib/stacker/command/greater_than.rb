@@ -1,5 +1,5 @@
 module Stacker
-  class Command
+  module Command
     class GreaterThan
       def execute(stack)
         b, a = stack.pop, stack.pop

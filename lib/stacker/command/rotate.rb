@@ -1,5 +1,5 @@
 module Stacker
-  class Command
+  module Command
     class Rotate
       def execute(stack)
         last_three = stack.last(3)

@@ -14,7 +14,7 @@ require_relative 'command/drop'
 require_relative 'command/rotate'
 
 module Stacker
-  class Command
+  module Command
     OPERATIONS = {
       "ADD"      => Addition,
       "SUBTRACT" => Subtraction,

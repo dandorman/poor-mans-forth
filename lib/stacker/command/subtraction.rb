@@ -1,5 +1,5 @@
 module Stacker
-  class Command
+  module Command
     class Subtraction
       def execute(stack)
         b, a = stack.pop, stack.pop

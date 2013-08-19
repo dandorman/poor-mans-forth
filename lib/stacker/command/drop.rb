@@ -1,5 +1,5 @@
 module Stacker
-  class Command
+  module Command
     class Drop
       def execute(stack)
         stack.pop

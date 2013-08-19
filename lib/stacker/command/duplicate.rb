@@ -1,5 +1,5 @@
 module Stacker
-  class Command
+  module Command
     class Duplicate
       def execute(stack)
         stack << stack.last
