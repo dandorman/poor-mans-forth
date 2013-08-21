@@ -14,6 +14,7 @@ module Stacker
       def execute(arg)
         Command.for(arg).execute(stack)
         self.class.new(env)
+
       rescue Command::UnknownCommand
         case arg
 
@@ -34,9 +35,9 @@ module Stacker
           return Processor::ProcedureDefinition.new($1, env.merge(previous: env[:previous] << self.class))
 
         when ":true"
-          stack << true
+          stack << Node::True.new
         when ":false"
-          stack << false
+          stack << Node::False.new
         when /\A:(.*)/
           stack << $1.to_sym
         when /\A\s*\z/

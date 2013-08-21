@@ -7,8 +7,10 @@ module Stacker
     def stack
       @processor.stack.map { |value|
         case value
-        when TrueClass, FalseClass
-          value.to_s.to_sym
+        when Node::True
+          :true
+        when Node::False
+          :false
         when Node::Number
           value.value
         else
